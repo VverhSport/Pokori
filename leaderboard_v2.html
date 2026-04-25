@@ -357,21 +357,25 @@
     document.querySelectorAll(".loc-panel").forEach(p=>p.classList.toggle("active",p.dataset.loc===loc));
   }
 
+  // Название фиксированного листа в таблице — измените если у вас другое
+  const SHEET_NAME = "Form_Responses";
+
   async function fetchSheet(){
-    const names=[getMonthName(),getRuMonthSheet()];
-    for(const name of names){
-      const url=`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&headers=1&sheet=${encodeURIComponent(name)}`;
-      const text=await(await fetch(url)).text();
-      if(text.indexOf('"table"')===-1) continue;
-      const json=JSON.parse(text.substring(text.indexOf('{'),text.lastIndexOf('}')+1));
-      if(json.table&&json.table.cols&&json.table.cols.length>1) return json;
-    }
-    throw new Error("Лист не найден");
+    // Читаем фиксированный лист (все данные за все время)
+    const url=`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&headers=1&sheet=${encodeURIComponent(SHEET_NAME)}`;
+    const text=await(await fetch(url)).text();
+    if(text.indexOf('"table"')===-1) throw new Error("Лист не найден");
+    return JSON.parse(text.substring(text.indexOf('{'),text.lastIndexOf('}')+1));
   }
 
   function parseRows(json){
     const cols=json.table.cols.map(c=>c.label||c.id);
     const raw=(json.table.rows||[]).map(r=>{const o={};r.c.forEach((c,i)=>{o[cols[i]]=c?.f??c?.v??""});return o;});
+
+    const now=new Date();
+    const curMonth=now.getMonth();
+    const curYear=now.getFullYear();
+
     return raw.map(r=>{
       const name=r["ФИО"]||r["ФИО клиента"]||r["ФИО участника"]||"";
       const loc=r["Локация"]||"";
@@ -384,8 +388,29 @@
       return{"ФИО":String(name).trim(),"Локация":String(loc).trim(),
         "Трасса":String(track).trim(),"Время (сек)":timeSec,
         "Время (формат)":String(timeFmt).trim(),"Дата":String(date).trim(),
-        "Пол":gender,"Возраст":String(age).trim()};
-    }).filter(r=>r["ФИО"]&&r["ФИО"]!==""&&r["ФИО"]!=="ФИО"&&r["ФИО"]!=="ФИО клиента");
+        "Пол":gender,"Возраст":String(age).trim(),"_rawDate":date};
+    }).filter(r=>{
+      if(!r["ФИО"]||r["ФИО"]===""||r["ФИО"]==="ФИО"||r["ФИО"]==="ФИО клиента") return false;
+      // Фильтруем по текущему месяцу
+      return isCurrentMonth(r["_rawDate"], curMonth, curYear);
+    });
+  }
+
+  function isCurrentMonth(dateStr, month, year){
+    if(!dateStr||dateStr==="") return false;
+    const s=String(dateStr).trim();
+    // Форматы: "28.03.2026 09:45", "28.03.2026", "2026-03-28", "3/28/2026"
+    let d;
+    if(s.match(/^\d{2}\.\d{2}\.\d{4}/)){
+      const p=s.split(/[. ]/);
+      d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+    } else if(s.match(/^\d{4}-\d{2}-\d{2}/)){
+      d=new Date(s.substring(0,10));
+    } else {
+      d=new Date(s);
+    }
+    if(isNaN(d.getTime())) return true; // не удалось распарсить — показываем
+    return d.getMonth()===month && d.getFullYear()===year;
   }
 
   function parseTimeToSec(s){
@@ -397,9 +422,21 @@
   const formatTime=r=>{const f=r["Время (формат)"],s=r["Время (сек)"];if(f&&f!=="")return f;if(s&&s!=="")return String(s);return"—";};
 
   function inAgeGroup(row, ag){
-    const a=parseInt(row["Возраст"]);
-    if(isNaN(a)) return true; // нет данных — показываем везде
-    return a>=ag.min&&a<=ag.max;
+    const raw=String(row["Возраст"]||"").trim().toLowerCase();
+    if(!raw||raw==="") return true; // нет данных — показываем везде
+
+    // Если возраст хранится как категория из формы ("до 10", "11-14", "15+")
+    if(raw.includes("до 10")||raw==="до10"||raw==="u10"||raw==="<10") return ag.id==="u10";
+    if(raw.includes("11")||raw.includes("11-14")||raw==="u14") return ag.id==="u14";
+    if(raw.includes("15")||raw==="15+"||raw==="u99"||raw.includes("старше")) return ag.id==="u99";
+
+    // Если возраст хранится как число
+    const a=parseInt(raw);
+    if(isNaN(a)) return true; // неизвестный формат — показываем везде
+    if(ag.id==="u10") return a<=10;
+    if(ag.id==="u14") return a>=11&&a<=14;
+    if(ag.id==="u99") return a>=15;
+    return false;
   }
   function isGender(row, gId){
     const g=String(row["Пол"]||"").toLowerCase();
