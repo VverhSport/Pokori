@@ -302,7 +302,7 @@
   ];
 
   const getRuMonth=()=>{const n=new Date(),e=n.toLocaleString('en-US',{month:'long'});return `${MONTHS[e]||e} ${n.getFullYear()}`.toUpperCase();};
-  const stripEmoji=s=>String(s).replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'').trim();
+  const stripEmoji=s=>String(s).replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'').trim().toLowerCase();
 
   // Embed logo from TV version — use CSS filter white
   

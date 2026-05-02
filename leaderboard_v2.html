@@ -288,7 +288,7 @@
   const getMonthName=()=>{const n=new Date();return `${n.toLocaleString('en-US',{month:'long'})} ${n.getFullYear()}`;};
   const getRuMonth=()=>{const n=new Date(),e=n.toLocaleString('en-US',{month:'long'});return `${MONTHS[e]||e} ${n.getFullYear()}`.toUpperCase();};
   const getRuMonthSheet=()=>{const n=new Date(),e=n.toLocaleString('en-US',{month:'long'});return `${MONTHS[e]||e} ${n.getFullYear()}`;};
-  const stripEmoji=s=>String(s).replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'').trim();
+  const stripEmoji=s=>String(s).replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'').trim().toLowerCase();
 
   function buildUI(){
     const tabsEl=document.getElementById("locTabs"),panelsEl=document.getElementById("locPanels");
