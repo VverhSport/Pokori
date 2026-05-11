@@ -15,7 +15,6 @@
       --red:#E8412A;--red-dark:#c93320;
     }
     *{margin:0;padding:0;box-sizing:border-box;}
-    html{zoom:0.62;}
     html,body{width:1280px;height:720px;overflow:hidden;
       background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
     body::before{content:'';position:fixed;inset:0;pointer-events:none;
@@ -79,9 +78,9 @@
       border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;}
 
     .track-header{padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-    .track-number{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;}
-    .track-title{font-size:20px;font-weight:800;}
-    .track-count{font-size:13px;color:var(--muted);margin-top:2px;}
+    .track-number{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;}
+    .track-title{font-size:16px;font-weight:800;}
+    .track-count{font-size:11px;color:var(--muted);margin-top:1px;}
 
     /* ══ ВОЗРАСТНЫЕ СЕКЦИИ ══ */
     .age-sections{flex:1;display:flex;flex-direction:column;overflow:hidden;}
@@ -89,24 +88,24 @@
     .age-section{flex:1;display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,0.05);}
     .age-section:first-child{border-top:none;}
 
-    .age-header{display:flex;align-items:center;gap:6px;padding:5px 14px;
+    .age-header{display:flex;align-items:center;gap:6px;padding:4px 14px;
       background:rgba(232,65,42,0.04);}
-    .age-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
-    .age-count{font-size:12px;color:var(--muted);margin-left:auto;}
+    .age-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+    .age-count{font-size:10px;color:var(--muted);margin-left:auto;}
 
     /* ══ ГЕНДЕРНЫЕ КОЛОНКИ ══ */
     .gender-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;}
     .gender-col{border-left:1px solid rgba(255,255,255,0.04);padding:2px 0;}
     .gender-col:first-child{border-left:none;}
     .gender-col-header{display:flex;align-items:center;gap:4px;
-      padding:3px 12px;font-size:13px;font-weight:700;opacity:0.7;}
+      padding:2px 10px;font-size:10px;font-weight:700;opacity:0.7;}
 
     /* ══ СТРОКИ ══ */
-    .mini-row{display:flex;align-items:center;gap:8px;padding:5px 12px;}
-    .mini-rank{font-size:18px;width:22px;text-align:center;flex-shrink:0;}
-    .mini-name{font-size:16px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .mini-time{font-family:'Bebas Neue',sans-serif;font-size:18px;
-      padding:2px 10px;border-radius:6px;
+    .mini-row{display:flex;align-items:center;gap:6px;padding:3px 10px;}
+    .mini-rank{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
+    .mini-name{font-size:12px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mini-time{font-family:'Bebas Neue',sans-serif;font-size:14px;
+      padding:1px 7px;border-radius:5px;
       background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
       letter-spacing:0.5px;flex-shrink:0;}
 
@@ -117,7 +116,7 @@
     .mini-row.r3 .mini-name{color:var(--bronze);}
     .mini-row.r3 .mini-time{color:var(--bronze);}
 
-    .no-data{font-size:14px;color:var(--muted);padding:5px 12px;font-style:italic;}
+    .no-data{font-size:11px;color:var(--muted);padding:4px 10px;font-style:italic;}
 
     .error-banner{position:fixed;top:12px;left:5%;right:5%;background:rgba(180,20,20,0.97);
       padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;
