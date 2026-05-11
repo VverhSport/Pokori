@@ -457,8 +457,8 @@
         if(cntEl){const n=allBest.length;cntEl.textContent=`${n} участник${n===1?'':n<5?'а':'ов'}`;}
         AGE_GROUPS.forEach(ag=>{
           const inAge=allBest.filter(({r})=>inAgeGroup(r,ag));
-          const males=inAge.filter(({r})=>isGender(r,'m')).slice(0,3);
-          const females=inAge.filter(({r})=>isGender(r,'f')).slice(0,3);
+          const males=inAge.filter(({r})=>isGender(r,'m')).slice(0,5);
+          const females=inAge.filter(({r})=>isGender(r,'f')).slice(0,5);
           const cntAgeEl=document.getElementById(`cnt-${idx}-${ti}-${ag.id}`);
           if(cntAgeEl)cntAgeEl.textContent=inAge.length?`${inAge.length} уч.`:'';
           renderMiniBoard(`board-${idx}-${ti}-${ag.id}-m`,males);
