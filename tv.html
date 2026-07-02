@@ -370,25 +370,23 @@
     }).filter(r=>{
       if(!r["ФИО"]||r["ФИО"]===""||r["ФИО"]==="ФИО"||r["ФИО"]==="ФИО клиента") return false;
       // Фильтруем по текущему месяцу
-      return isCurrentMonth(r["_rawDate"], curMonth, curYear);
+      return isCurrentMonth(r["_rawDate"]);
     });
   }
 
-  function isCurrentMonth(dateStr, month, year){
+  // Квартал: июнь–август 2026
+  const QUARTER_START = new Date(2026, 5, 1);
+  const QUARTER_END   = new Date(2026, 8, 1);
+
+  function isCurrentMonth(dateStr){
     if(!dateStr||dateStr==="") return false;
     const s=String(dateStr).trim();
-    // Форматы: "28.03.2026 09:45", "28.03.2026", "2026-03-28", "3/28/2026"
     let d;
-    if(s.match(/^\d{2}\.\d{2}\.\d{4}/)){
-      const p=s.split(/[. ]/);
-      d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
-    } else if(s.match(/^\d{4}-\d{2}-\d{2}/)){
-      d=new Date(s.substring(0,10));
-    } else {
-      d=new Date(s);
-    }
-    if(isNaN(d.getTime())) return true; // не удалось распарсить — показываем
-    return d.getMonth()===month && d.getFullYear()===year;
+    if(s.match(/^\d{2}\.\d{2}\.\d{4}/)){const p=s.split(/[. ]/);d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}
+    else if(s.match(/^\d{4}-\d{2}-\d{2}/)){d=new Date(s.substring(0,10));}
+    else{d=new Date(s);}
+    if(isNaN(d.getTime())) return true;
+    return d>=QUARTER_START && d<QUARTER_END;
   }
 
   function parseTimeToSec(s){

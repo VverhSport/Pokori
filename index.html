@@ -364,7 +364,7 @@
 
   function parseRows(json){
     const cols=json.table.cols.map(c=>c.label||c.id);
-    const now=new Date(), cm=now.getMonth(), cy=now.getFullYear();
+    
     const raw=(json.table.rows||[]).map(r=>{const o={};r.c.forEach((c,i)=>{o[cols[i]]=c?.f??c?.v??""});return o;});
     return raw.map(r=>{
       const name=r["ФИО"]||r["ФИО клиента"]||r["ФИО участника"]||"";
@@ -380,11 +380,15 @@
         "Пол":gender,"Возраст":String(age).trim(),"_d":date};
     }).filter(r=>{
       if(!r["ФИО"]||r["ФИО"]===""||r["ФИО"]==="ФИО") return false;
-      return isCurrentMonth(r["_d"],cm,cy);
+      return isCurrentMonth(r["_d"]);
     });
   }
 
-  function isCurrentMonth(s,m,y){
+  // Квартал: июнь–август 2026
+  const QUARTER_START = new Date(2026, 5, 1);  // 1 июня 2026
+  const QUARTER_END   = new Date(2026, 8, 1);  // 1 сентября 2026 (не включая)
+
+  function isCurrentMonth(s){
     if(!s||s==="") return false;
     s=String(s).trim();
     let d;
@@ -392,7 +396,7 @@
     else if(s.match(/^\d{4}-\d{2}-\d{2}/)){d=new Date(s.substring(0,10));}
     else{d=new Date(s);}
     if(isNaN(d.getTime())) return true;
-    return d.getMonth()===m&&d.getFullYear()===y;
+    return d>=QUARTER_START && d<QUARTER_END;
   }
 
   function parseTimeToSec(s){
