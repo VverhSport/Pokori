@@ -191,6 +191,26 @@
 
     @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
     .fade-in{animation:fadeIn 0.3s ease;}
+
+    /* ══ ПРЕТЕНДЕНТЫ ══ */
+    .leaders-loc{margin-bottom:16px;}
+    .leaders-loc-title{font-size:13px;font-weight:800;color:#fff;
+      background:rgba(232,65,42,0.8);border-radius:8px 8px 0 0;
+      padding:7px 14px;letter-spacing:0.5px;}
+    .leaders-table{width:100%;border-collapse:collapse;
+      background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);}
+    .leaders-table td{padding:5px 12px;font-size:12px;
+      border-bottom:1px solid rgba(255,255,255,0.04);}
+    .leaders-table tr:last-child td{border-bottom:none;}
+    .ld-cat{color:var(--muted);font-size:11px;white-space:nowrap;}
+    .ld-medal{width:26px;text-align:center;font-size:14px;}
+    .ld-name{font-weight:600;}
+    .ld-name.g1{color:var(--gold);}
+    .ld-name.g2{color:var(--silver);}
+    .ld-name.g3{color:var(--bronze);}
+    .ld-prize{color:var(--muted);font-size:11px;text-align:right;white-space:nowrap;}
+    .ld-single{opacity:0.75;font-style:italic;}
+    .leaders-note{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;}
   </style>
 </head>
 <body>
@@ -251,6 +271,12 @@
         <div class="prize-row"><div class="prize-medal">🥈</div><div class="prize-place" style="color:var(--silver)">2 место</div><div class="prize-desc">Приз + грамота</div></div>
         <div class="prize-row"><div class="prize-medal">🥉</div><div class="prize-place" style="color:var(--bronze)">3 место</div><div class="prize-desc">Приз + грамота</div></div>
       </div>
+    </div>
+
+        <div class="reg-section">
+      <div class="reg-stitle">🏅 Текущие претенденты на призы</div>
+      <div id="leadersBlock"><div style="color:var(--muted);font-size:12px">Загрузка...</div></div>
+      <div class="leaders-note">Список обновляется автоматически. Итоги — в конце квартала.</div>
     </div>
 
     <div class="reg-section">
@@ -461,11 +487,96 @@
     });
   }
 
+
+  // ══ ПРИЗЫ (заполнить после согласования) ══
+  const PRIZES = {
+    1: "Приз уточняется",
+    2: "Приз уточняется",
+    3: "Приз уточняется",
+  };
+  const PRIZES_SINGLE = {
+    1: "Приз уточняется",
+    2: "Приз уточняется",
+    3: "Приз уточняется",
+  };
+
+  function renderLeaders(rows){
+    const el = document.getElementById('leadersBlock');
+    if(!el) return;
+
+    const AGE_LABELS = {u10:'До 10', u14:'11–14', u99:'15+'};
+    const MEDS = ['🥇','🥈','🥉'];
+    let html = '';
+
+    Object.keys(LOCATIONS).forEach((loc,idx)=>{
+      // Собираем лучшие результаты по обеим трассам для каждого участника этой локации
+      const locRows = rows.filter(r=>stripEmoji(r["Локация"])===stripEmoji(loc));
+      // best[имя+возр+пол] = {t1, t2}
+      const best = {};
+      locRows.forEach(r=>{
+        const t = getTimeSec(r);
+        if(t===Infinity||isNaN(t)) return;
+        const track = String(r["Трасса"]).trim();
+        const key = r["ФИО"]+'|'+String(r["Возраст"]).trim()+'|'+String(r["Пол"]).trim();
+        if(!best[key]) best[key] = {name:r["ФИО"], age:r["Возраст"], gender:r["Пол"], t1:null, t2:null};
+        if(track==='Трасса 1'){ if(best[key].t1===null||t<best[key].t1) best[key].t1=t; }
+        if(track==='Трасса 2'){ if(best[key].t2===null||t<best[key].t2) best[key].t2=t; }
+      });
+
+      let locHtml = '';
+      AGE_GROUPS.forEach(ag=>{
+        ['m','f'].forEach(gId=>{
+          const inCat = Object.values(best).filter(p=>{
+            const fakeRow = {"Возраст":p.age,"Пол":p.gender};
+            return inAgeGroup(fakeRow,ag)&&isGender(fakeRow,gId);
+          });
+          const both   = inCat.filter(p=>p.t1!==null&&p.t2!==null)
+            .map(p=>({...p,score:(p.t1+p.t2)/2}))
+            .sort((a,b)=>a.score-b.score).slice(0,3);
+          const single = inCat.filter(p=>(p.t1===null)!==(p.t2===null))
+            .map(p=>({...p,score:p.t1!==null?p.t1:p.t2}))
+            .sort((a,b)=>a.score-b.score).slice(0,3);
+
+          if(!both.length&&!single.length) return;
+          const gSym = gId==='m'?'♂':'♀';
+          const catLabel = `${AGE_LABELS[ag.id]} ${gSym}`;
+
+          both.forEach((p,i)=>{
+            locHtml += `<tr>
+              <td class="ld-cat">${i===0?catLabel:''}</td>
+              <td class="ld-medal">${MEDS[i]}</td>
+              <td class="ld-name g${i+1}">${p.name}</td>
+              <td class="ld-prize">${PRIZES[i+1]||''}</td>
+            </tr>`;
+          });
+          single.forEach((p,i)=>{
+            locHtml += `<tr class="ld-single">
+              <td class="ld-cat">${(!both.length&&i===0)?catLabel+' (1 трасса)':''}</td>
+              <td class="ld-medal">${MEDS[i]}</td>
+              <td class="ld-name g${i+1}">${p.name}</td>
+              <td class="ld-prize">${PRIZES_SINGLE[i+1]||''}</td>
+            </tr>`;
+          });
+        });
+      });
+
+      if(locHtml){
+        html += `<div class="leaders-loc">
+          <div class="leaders-loc-title">${loc}</div>
+          <table class="leaders-table">${locHtml}</table>
+        </div>`;
+      }
+    });
+
+    el.innerHTML = html || '<div style="color:var(--muted);font-size:12px">Пока нет результатов</div>';
+  }
+
   async function refresh(){
     try{
       document.getElementById("errorBanner").style.display="none";
       const rows=parseRows(await fetchSheet());
       renderAll(rows);
+      renderLeaders(rows);
       document.getElementById("monthBadge").textContent="ИЮН — АВГ 2026";
       document.getElementById("lastUpdate").textContent="Обновлено: "+new Date().toLocaleTimeString("ru-RU");
     }catch(e){
