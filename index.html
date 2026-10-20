@@ -146,6 +146,9 @@ th.c-nm{text-align:left}
 .c-br{text-align:left;font-size:10.5px;color:var(--ink2)}
 .c-br i{display:inline-block;width:8px;height:8px;border-radius:2px;transform:rotate(45deg);background:var(--c);margin-right:8px;vertical-align:1px}
 .c-t{min-width:62px;color:var(--ink2)}
+.c-g{width:44px;min-width:44px}
+.g.sm{width:22px;height:22px;font-size:10px;margin:0 auto}
+.cat-h .cnt b{font-weight:500}
 .c-t.z{color:#C9C6D1}
 .c-sum{position:sticky;right:0;z-index:1;font-weight:700;font-size:14px;padding-right:16px;min-width:70px;box-shadow:-6px 0 8px -8px rgba(0,0,0,.25)}
 th.c-pl,th.c-nm,th.c-sum{background:var(--soft)}
@@ -478,21 +481,29 @@ function cardsView(list){
 function tablesView(list){
   const q = norm(state.q);
   const f = list.filter(r => !q || norm(r.name).includes(q) || norm(r.coach).includes(q));
+  const order = (x,y) => x.total - y.total || x.name.localeCompare(y.name,'ru');
+  const gColor = g => g === 'Ж' ? '#EF7C00' : '#6C619C';
+  const showBr = state.tab === 'all';   // колонка филиала — только в общем списке всех филиалов
   let html = '';
-  for(const age of agesIn()) for(const g of GENDERS){
-    const both = byCat(f, age, g, true), solo = byCat(f, age, g, false);
-    if(!both.length && !solo.length) continue;
+  for(const age of agesIn()){
+    // общий список возраста: девочки и мальчики вместе, по итоговому времени
+    const all  = f.filter(r => r.age === age);
+    const both = all.filter(r => r.both).sort(order), solo = all.filter(r => !r.both).sort(order);
+    if(!all.length) continue;
+    const nG = g => all.filter(r => r.g === g).length;
     const tr = (r, cls) => { const b = BR[r.branch]; return `<tr class="${cls}">
       <td class="c-pl">${placeBadge(r.place, true)}</td>
       <td class="c-nm"><div class="nm">${esc(r.name)}</div>${r.coach?`<div class="co">${esc(r.coach)}</div>`:''}</td>
-      <td class="c-br">${b ? `<i style="--c:${b.color}"></i>${b.name}` : '—'}</td>
+      <td class="c-g">${r.g ? `<span class="g sm" style="--c:${gColor(r.g)}">${r.g}</span>` : '—'}</td>
+      ${showBr ? `<td class="c-br">${b ? `<i style="--c:${b.color}"></i>${b.name}` : '—'}</td>` : ''}
       <td class="c-t${r.t1==null?' z':''}">${r.t1==null?'—':sec(r.t1)}</td>
       <td class="c-t${r.t2==null?' z':''}">${r.t2==null?'—':sec(r.t2)}</td>
       <td class="c-sum">${sec(r.total)}</td></tr>`; };
-    html += `<section class="cat"><header class="cat-h"><span class="age">${AGE[age].label}</span><span class="g" style="--c:${g==='Ж'?'#EF7C00':'#6C619C'}">${g}</span><span class="cnt">${people(both.length + solo.length)}</span></header>
-      <div class="tbl"><table><thead><tr><th class="c-pl">Место</th><th class="c-nm">Участник</th><th class="c-br">Филиал</th><th class="c-t">Трасса 1</th><th class="c-t">Трасса 2</th><th class="c-sum">Итог</th></tr></thead>
+    html += `<section class="cat"><header class="cat-h"><span class="age">${AGE[age].label}</span>
+        <span class="cnt">${people(all.length)} · <b style="color:#EF7C00">Ж ${nG('Ж')}</b> · <b style="color:#6C619C">М ${nG('М')}</b></span></header>
+      <div class="tbl"><table><thead><tr><th class="c-pl">Место</th><th class="c-nm">Участник</th><th class="c-g">Пол</th>${showBr ? '<th class="c-br">Филиал</th>' : ''}<th class="c-t">Трасса 1</th><th class="c-t">Трасса 2</th><th class="c-sum">Итог</th></tr></thead>
       <tbody>${both.map(r => tr(r,'')).join('')}
-      ${solo.length ? `<tr class="sub-h"><td colspan="6">Одна трасса · отдельный зачёт</td></tr>` + solo.map(r => tr(r,'solo')).join('') : ''}
+      ${solo.length ? `<tr class="sub-h"><td colspan="${showBr ? 7 : 6}">Одна трасса · отдельный зачёт</td></tr>` + solo.map(r => tr(r,'solo')).join('') : ''}
       </tbody></table></div></section>`;
   }
   return html || `<div class="empty">${list.length ? 'Ничего не найдено' : 'Результатов пока нет'}</div>`;
@@ -514,7 +525,7 @@ function renderView(){
       <p>${CONFIG.SEASON.label} · итог — среднее лучших времён двух трасс</p></div>
       <div class="stat" style="--c:${color}"><b>${list.length}</b><span>${plural(list.length,['участник','участника','участников'])}</span></div></div>
     <div class="tiles">${tiles.map(t => `<div class="tile" style="--c:${t.color}"><b>${t.n}</b><span>${t.name}</span></div>`).join('')}</div>
-    <p class="hint">${mode === 'top' ? `Топ-${CONFIG.TOP} в каждой категории · Т1 и Т2 — лучшее время на трассе, итог — среднее двух · кто пробежал одну трассу, идёт отдельным зачётом ниже` : 'Лучшее время на каждой трассе · итог — среднее двух'}</p>
+    <p class="hint">${mode === 'top' ? `Топ-${CONFIG.TOP} в каждой категории · Т1 и Т2 — лучшее время на трассе, итог — среднее двух · кто пробежал одну трассу, идёт отдельным зачётом ниже` : 'Общий список по возрасту · место — в своей категории (Ж или М) · Т1, Т2 — лучшее время на трассе, итог — среднее двух'}</p>
     ${list.length ? (mode === 'top' ? cardsView(list) : tablesView(list)) : `<div class="empty">Результатов сезона пока нет</div>`}`;
 }
 
