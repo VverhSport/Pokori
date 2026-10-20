@@ -103,6 +103,17 @@ h1{font-weight:300;text-transform:uppercase;font-size:clamp(30px,7.4vw,70px);lin
 .co i{display:inline-block;width:7px;height:7px;border-radius:2px;transform:rotate(45deg);background:var(--c);margin:0 6px 0 1px;vertical-align:1px}
 .pts{font-weight:700;font-size:18px;text-align:right;font-variant-numeric:tabular-nums}
 .pts small{display:block;font-size:9px;font-weight:300;color:var(--muted);margin-top:2px;letter-spacing:.02em}
+.tt{display:none;text-align:right;font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.tt.z{color:#C9C6D1}
+.cols{display:none}
+.tt-in b{font-weight:500;color:var(--ink2)}
+@media(min-width:760px){
+  .row{grid-template-columns:36px 1fr 58px 58px 72px}
+  .tt{display:block}
+  .tt-in{display:none}
+  .pts small{display:none}
+  .cols{display:grid;grid-template-columns:1fr 58px 58px 72px;gap:12px;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:right;padding:0 0 6px}
+}
 .card.is-empty{background:transparent;border:1.5px dashed #D6D3DE}
 .none{font-size:11.5px;color:var(--muted);padding:6px 0 14px;font-weight:300}
 .split{display:flex;align-items:center;gap:9px;margin:10px 0 2px;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:400}
@@ -240,9 +251,9 @@ const BRANCHES = [
 ];
 const BR = Object.fromEntries(BRANCHES.map(b => [b.id, b]));
 const AGES = [
-  {id:'u10', label:'До 10',  short:'до 10 лет'},
-  {id:'u14', label:'11–14',  short:'11–14 лет'},
-  {id:'u15', label:'15+',    short:'15 лет и старше'},
+  {id:'u10', label:'До 10',  short:'До 10'},
+  {id:'u14', label:'11–14',  short:'11–14'},
+  {id:'u15', label:'15+',    short:'15+'},
 ];
 const AGE = Object.fromEntries(AGES.map(a => [a.id, a]));
 const GENDERS = ['Ж','М'];
@@ -263,7 +274,12 @@ function displayName(raw){
   return w.map(titleCase).join(' ');
 }
 // ключ человека: без отчества и без учёта порядка слов
-const nameKey = v => norm(v).split(' ').filter(w => !/(вич|вна|ична|оглы|кызы)$/.test(w)).sort().join(' ');
+const nameKey = v => {
+  const w = norm(v).split(' ').filter(Boolean);
+  // отчество отбрасываем, только если это последнее из 3+ слов (фамилия тоже бывает на «-вич»)
+  if(w.length > 2 && /(ич|в+н+а|ична|оглы|кызы)$/.test(w[w.length-1])) w.pop();
+  return w.sort().join(' ');
+};
 const parseBranch = v => (BRANCHES.find(b => b.re.test(norm(v))) || {}).id || null;
 
 function parseAge(v){
@@ -443,11 +459,13 @@ function cardsView(list){
       if(state.age === 'all' && !both.length && !solo.length) continue;
       const head = `<header class="card-h"><span class="age">${AGE[age].label}</span><span class="g" style="--c:${g==='Ж'?'#EF7C00':'#6C619C'}">${g}</span>`;
       if(!both.length && !solo.length){ html += `<article class="card is-empty">${head}</header><p class="none">Пока нет результатов</p></article>`; continue; }
+      const tt = v => `<span class="tt${v==null?' z':''}">${v==null?'—':sec(v)}</span>`;
       const rowHtml = (r, cls) => `<li class="row${cls}">${placeBadge(r.place)}
-        <div><div class="nm">${esc(r.name)}</div>${subline(r)?`<div class="co">${subline(r)}</div>`:''}</div>
-        <b class="pts">${sec(r.total)}<small>${r.both?'сек · итог':'сек · 1 трасса'}</small></b></li>`;
+        <div><div class="nm">${esc(r.name)}</div>${subline(r)?`<div class="co">${subline(r)}</div>`:''}<div class="co tt-in">Т1 <b>${r.t1==null?'—':sec(r.t1)}</b> · Т2 <b>${r.t2==null?'—':sec(r.t2)}</b></div></div>
+        ${tt(r.t1)}${tt(r.t2)}<b class="pts">${sec(r.total)}<small>${r.both?'итог':'1 трасса'}</small></b></li>`;
       const topBoth = both.slice(0, CONFIG.TOP), topSolo = solo.slice(0, CONFIG.TOP);
       html += `<article class="card">${head}<span class="cnt">${people(both.length + solo.length)}</span></header>
+        <div class="cols"><span></span><span>Т1</span><span>Т2</span><span>Итог</span></div>
         ${topBoth.length ? `<ol class="rows">${topBoth.map(r => rowHtml(r,'')).join('')}</ol>` : `<p class="none">В зачёте двух трасс пока никого</p>`}
         ${topSolo.length ? `<div class="split">Одна трасса</div><ol class="rows">${topSolo.map(r => rowHtml(r,' solo')).join('')}</ol>` : ''}
         ${(both.length > topBoth.length || solo.length > topSolo.length) ? `<button class="more" data-more="${age}">Все ${both.length + solo.length} →</button>` : ''}</article>`;
@@ -496,7 +514,7 @@ function renderView(){
       <p>${CONFIG.SEASON.label} · итог — среднее лучших времён двух трасс</p></div>
       <div class="stat" style="--c:${color}"><b>${list.length}</b><span>${plural(list.length,['участник','участника','участников'])}</span></div></div>
     <div class="tiles">${tiles.map(t => `<div class="tile" style="--c:${t.color}"><b>${t.n}</b><span>${t.name}</span></div>`).join('')}</div>
-    <p class="hint">${mode === 'top' ? `Топ-${CONFIG.TOP} в каждой категории · кто пробежал одну трассу, идёт отдельным зачётом ниже` : 'Лучшее время на каждой трассе · итог — среднее двух'}</p>
+    <p class="hint">${mode === 'top' ? `Топ-${CONFIG.TOP} в каждой категории · Т1 и Т2 — лучшее время на трассе, итог — среднее двух · кто пробежал одну трассу, идёт отдельным зачётом ниже` : 'Лучшее время на каждой трассе · итог — среднее двух'}</p>
     ${list.length ? (mode === 'top' ? cardsView(list) : tablesView(list)) : `<div class="empty">Результатов сезона пока нет</div>`}`;
 }
 
@@ -518,7 +536,7 @@ function renderRules(){
     <div class="rules-grid">${rules.map(([b,s]) => `<div class="rule"><b>${b}</b><span>${s}</span></div>`).join('')}</div>
     <h3 style="margin-top:22px"><i class="dia" style="--c:#EF7C00"></i>Специальные номинации</h3>
     <div class="noms">${noms.map(([b,s,c]) => `<div class="nom" style="--c:${c}"><b>${b}</b><span>${s}</span></div>`).join('')}</div>
-    <p class="hint" style="margin:14px 0 0">Категории: ${AGES.map(a => a.short).join(' · ')} · мужской и женский зачёт раздельно на каждом филиале.</p>`;
+    <p class="hint" style="margin:14px 0 0">Категории: ${AGES.map(a => a.short).join(' / ')} · мужской и женский зачёт раздельно на каждом филиале.</p>`;
 }
 
 function renderMeta(){
