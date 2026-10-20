@@ -342,7 +342,7 @@ function parseSheet(json){
   const find = re => cols.findIndex(c => re.test(c));
   const iDate = find(/отметка|дата|timestamp/), iName = find(/фио|спортсмен|участник/);
   const iLoc  = find(/локац|филиал/), iTrack = find(/трасс/), iTime = find(/время/);
-  const iCoach = find(/инструктор|тренер/), iG = find(/^пол$|пол\b/), iAge = find(/возраст|категор/);
+  const iG = find(/^пол$|пол\b/), iAge = find(/возраст|категор/);
   const txt = c => c == null ? '' : String(c.f ?? c.v ?? '');
   const raw = c => c == null ? null : (c.v ?? c.f ?? null);
   return (json.table.rows || []).map(r => ({
@@ -351,7 +351,6 @@ function parseSheet(json){
     loc:   txt(r.c[iLoc]),
     track: txt(r.c[iTrack]),
     time:  iTime >= 0 ? (raw(r.c[iTime]) ?? txt(r.c[iTime])) : null,
-    coach: iCoach >= 0 ? txt(r.c[iCoach]) : '',
     g:     iG   >= 0 ? txt(r.c[iG])   : '',
     age:   iAge >= 0 ? txt(r.c[iAge]) : '',
   }));
@@ -374,12 +373,11 @@ function build(rows){
     const g = parseGender(r.g), age = parseAge(r.age);
     const key = branch + '|' + nameKey(name);
     let a = byKey.get(key);
-    if(!a) byKey.set(key, a = {key, name:displayName(name), branch, coach:displayName(r.coach), best:{}, tries:0, dates:new Set(), gv:{}, av:{}});
+    if(!a) byKey.set(key, a = {key, name:displayName(name), branch, best:{}, tries:0, dates:new Set(), gv:{}, av:{}});
     a.tries++; attempts++;
     a.dates.add(d.toDateString()); days.add(d.toDateString());
     if(a.best[track] == null || t < a.best[track]) a.best[track] = t;
     a.name = displayName(name);
-    if(r.coach) a.coach = displayName(r.coach);
     if(g)   a.gv[g]   = (a.gv[g]   || 0) + 1;   // пол и возраст — по самому частому варианту в записях
     if(age) a.av[age] = (a.av[age] || 0) + 1;
   }
@@ -389,7 +387,7 @@ function build(rows){
     const t1 = a.best['Трасса 1'] ?? null, t2 = a.best['Трасса 2'] ?? null;
     if(t1 == null && t2 == null) continue;
     const both = t1 != null && t2 != null;
-    recs.push({key:a.key, name:a.name, branch:a.branch, coach:a.coach, t1, t2, both,
+    recs.push({key:a.key, name:a.name, branch:a.branch, t1, t2, both,
       total: both ? (t1 + t2)/2 : (t1 ?? t2),
       g: top(a.gv), age: top(a.av), tries:a.tries, days:a.dates.size});
   }
@@ -436,7 +434,7 @@ function renderToolbar(){
   document.getElementById('toolbar').innerHTML = `
     <div class="seg" role="group" aria-label="Вид">${modes.map(([m,l]) => `<button data-mode="${m}" aria-pressed="${mode===m}">${l}</button>`).join('')}</div>
     ${mode === 'table' ? `<label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Фамилия участника или инструктора" value="${esc(state.q)}" autocomplete="off"></label>` : ''}
+      <input id="q" type="search" placeholder="Фамилия участника" value="${esc(state.q)}" autocomplete="off"></label>` : ''}
     <div class="chips" aria-label="Возраст">${['all',...AGES.map(a=>a.id)].map(a =>
       `<button class="chip" data-age="${a}" aria-pressed="${state.age===a}">${a==='all'?'Все возрасты':AGE[a].short}</button>`).join('')}</div>`;
 }
@@ -449,7 +447,6 @@ function subline(r){
   const b = BR[r.branch];
   const parts = [];
   if(state.tab === 'all' && b) parts.push(`<i style="--c:${b.color}"></i>${b.name}`);
-  if(r.coach) parts.push(esc(r.coach));
   return parts.join(' · ');
 }
 
@@ -480,7 +477,7 @@ function cardsView(list){
 /* Протокол: таблица с обеими трассами */
 function tablesView(list){
   const q = norm(state.q);
-  const f = list.filter(r => !q || norm(r.name).includes(q) || norm(r.coach).includes(q));
+  const f = list.filter(r => !q || norm(r.name).includes(q));
   const order = (x,y) => x.total - y.total || x.name.localeCompare(y.name,'ru');
   const gColor = g => g === 'Ж' ? '#EF7C00' : '#6C619C';
   const showBr = state.tab === 'all';   // колонка филиала — только в общем списке всех филиалов
@@ -493,7 +490,7 @@ function tablesView(list){
     const nG = g => all.filter(r => r.g === g).length;
     const tr = (r, cls) => { const b = BR[r.branch]; return `<tr class="${cls}">
       <td class="c-pl">${placeBadge(r.place, true)}</td>
-      <td class="c-nm"><div class="nm">${esc(r.name)}</div>${r.coach?`<div class="co">${esc(r.coach)}</div>`:''}</td>
+      <td class="c-nm"><div class="nm">${esc(r.name)}</div></td>
       <td class="c-g">${r.g ? `<span class="g sm" style="--c:${gColor(r.g)}">${r.g}</span>` : '—'}</td>
       ${showBr ? `<td class="c-br">${b ? `<i style="--c:${b.color}"></i>${b.name}` : '—'}</td>` : ''}
       <td class="c-t${r.t1==null?' z':''}">${r.t1==null?'—':sec(r.t1)}</td>

@@ -226,7 +226,7 @@ function parseSheet(json){
   const find = re => cols.findIndex(c => re.test(c));
   const iDate = find(/отметка|дата|timestamp/), iName = find(/фио|спортсмен|участник/);
   const iLoc  = find(/локац|филиал/), iTrack = find(/трасс/), iTime = find(/время/);
-  const iCoach = find(/инструктор|тренер/), iG = find(/^пол$|пол\b/), iAge = find(/возраст|категор/);
+  const iG = find(/^пол$|пол\b/), iAge = find(/возраст|категор/);
   const txt = c => c == null ? '' : String(c.f ?? c.v ?? '');
   const raw = c => c == null ? null : (c.v ?? c.f ?? null);
   return (json.table.rows || []).map(r => ({
@@ -235,7 +235,6 @@ function parseSheet(json){
     loc:   txt(r.c[iLoc]),
     track: txt(r.c[iTrack]),
     time:  iTime >= 0 ? (raw(r.c[iTime]) ?? txt(r.c[iTime])) : null,
-    coach: iCoach >= 0 ? txt(r.c[iCoach]) : '',
     g:     iG   >= 0 ? txt(r.c[iG])   : '',
     age:   iAge >= 0 ? txt(r.c[iAge]) : '',
   }));
@@ -258,12 +257,11 @@ function build(rows){
     const g = parseGender(r.g), age = parseAge(r.age);
     const key = branch + '|' + nameKey(name);
     let a = byKey.get(key);
-    if(!a) byKey.set(key, a = {key, name:displayName(name), branch, coach:displayName(r.coach), best:{}, tries:0, dates:new Set(), gv:{}, av:{}});
+    if(!a) byKey.set(key, a = {key, name:displayName(name), branch, best:{}, tries:0, dates:new Set(), gv:{}, av:{}});
     a.tries++; attempts++;
     a.dates.add(d.toDateString()); days.add(d.toDateString());
     if(a.best[track] == null || t < a.best[track]) a.best[track] = t;
     a.name = displayName(name);
-    if(r.coach) a.coach = displayName(r.coach);
     if(g)   a.gv[g]   = (a.gv[g]   || 0) + 1;   // пол и возраст — по самому частому варианту в записях
     if(age) a.av[age] = (a.av[age] || 0) + 1;
   }
@@ -273,7 +271,7 @@ function build(rows){
     const t1 = a.best['Трасса 1'] ?? null, t2 = a.best['Трасса 2'] ?? null;
     if(t1 == null && t2 == null) continue;
     const both = t1 != null && t2 != null;
-    recs.push({key:a.key, name:a.name, branch:a.branch, coach:a.coach, t1, t2, both,
+    recs.push({key:a.key, name:a.name, branch:a.branch, t1, t2, both,
       total: both ? (t1 + t2)/2 : (t1 ?? t2),
       g: top(a.gv), age: top(a.av), tries:a.tries, days:a.dates.size});
   }
