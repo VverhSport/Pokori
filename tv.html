@@ -7,25 +7,31 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;900&display=swap');
     :root{
-      --bg:#0a0a0a;--panel:#141414;--border:rgba(255,255,255,0.09);
-      --accent1:#E8412A;--accent2:#c93320;
-      --gold:#ffd700;--silver:#c0c0c0;--bronze:#cd7f32;
-      --green:#22c55e;--text:#f0f0f0;--muted:#666;--prize:#E8412A;
-      --male:#6495ED;--female:#FF69B4;
-      --red:#E8412A;--red-dark:#c93320;
+      /* Фирменная палитра спортпарка «Вверх» */
+      --brand-green:#64B145; --brand-green-d:#4A8F31;
+      --brand-orange:#E47E1A; --brand-orange-d:#C25F0A;
+      --brand-purple:#8E74AD; --brand-purple-d:#6B5490;
+      --brand-black:#0A0A0D;
+
+      --bg:#0A0A0D;--panel:#15151A;--border:rgba(255,255,255,0.09);
+      --accent1:#E47E1A;--accent2:#C25F0A;
+      --gold:#E4B01A;--silver:#B9B9C2;--bronze:#C2873F;
+      --green:#64B145;--text:#F2F2F4;--muted:#6E6E78;--prize:#E47E1A;
+      --male:#8E74AD;--female:#E47E1A;
+      --red:#E47E1A;--red-dark:#C25F0A;
     }
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{width:1280px;height:720px;overflow:hidden;
       background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
     body::before{content:'';position:fixed;inset:0;pointer-events:none;
-      background:radial-gradient(ellipse at 50% 0%,rgba(232,65,42,0.08),transparent 55%);}
+      background:radial-gradient(ellipse at 50% 0%,rgba(228,126,26,0.09),transparent 55%);}
 
     /* ══ ШАПКА ══ */
     .header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
       padding:0 28px;height:86px;border-bottom:1px solid var(--border);
-      background:linear-gradient(180deg,rgba(0,194,255,0.04),transparent);}
+      background:linear-gradient(180deg,rgba(228,126,26,0.05),transparent);}
     .logo{display:flex;align-items:center;gap:10px;}
-    .logo-icon{font-size:34px;filter:drop-shadow(0 0 12px rgba(0,194,255,0.6));
+    .logo-icon{font-size:34px;filter:drop-shadow(0 0 12px rgba(228,126,26,0.45));
       animation:float 4s ease-in-out infinite;}
     @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
     .logo-main{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;
@@ -43,10 +49,10 @@
     .live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
     @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,0.5);}70%{box-shadow:0 0 0 6px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
     .last-upd{font-size:10px;color:var(--muted);}
-    .reg-btn{background:rgba(232,65,42,0.15);border:1px solid rgba(232,65,42,0.35);
+    .reg-btn{background:rgba(228,126,26,0.15);border:1px solid rgba(228,126,26,0.35);
       border-radius:7px;color:var(--text);font-size:11px;font-weight:600;
       padding:4px 12px;cursor:pointer;font-family:'Inter',sans-serif;}
-    .reg-btn:hover{background:rgba(232,65,42,0.28);}
+    .reg-btn:hover{background:rgba(228,126,26,0.28);}
 
     /* ══ ПРИЗ ══ */
 
@@ -83,7 +89,7 @@
     .age-section:first-child{border-top:none;}
 
     .age-header{display:flex;align-items:center;gap:6px;padding:4px 14px;
-      background:rgba(232,65,42,0.04);}
+      background:rgba(228,126,26,0.04);}
     .age-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
     .age-count{font-size:10px;color:var(--muted);margin-left:auto;}
 
@@ -133,7 +139,7 @@
     .modal-sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;}
     .reg-section{margin-bottom:22px;}
     .reg-section-title{font-size:14px;font-weight:800;color:var(--red);
-      border-bottom:2px solid rgba(232,65,42,0.2);padding-bottom:5px;margin-bottom:12px;}
+      border-bottom:2px solid rgba(228,126,26,0.2);padding-bottom:5px;margin-bottom:12px;}
     .reg-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
     .reg-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:11px 14px;}
     .reg-card-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
@@ -144,8 +150,8 @@
     .cat-name-m{font-size:13px;font-weight:700;margin-bottom:3px;}
     .cat-age-m{font-size:11px;color:var(--muted);}
     .prize-table{width:100%;border-collapse:collapse;margin-bottom:6px;}
-    .prize-table th{background:rgba(232,65,42,0.12);color:var(--red);font-size:10px;
-      text-transform:uppercase;letter-spacing:1px;padding:7px 10px;text-align:left;border-bottom:1px solid rgba(232,65,42,0.2);}
+    .prize-table th{background:rgba(228,126,26,0.12);color:var(--red);font-size:10px;
+      text-transform:uppercase;letter-spacing:1px;padding:7px 10px;text-align:left;border-bottom:1px solid rgba(228,126,26,0.2);}
     .prize-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;}
     .prize-table tr:last-child td{border-bottom:none;}
     .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -161,7 +167,7 @@
     /* ══ ПРЕТЕНДЕНТЫ ══ */
     .leaders-loc{margin-bottom:16px;}
     .leaders-loc-title{font-size:13px;font-weight:800;color:#fff;
-      background:rgba(232,65,42,0.8);border-radius:8px 8px 0 0;
+      background:rgba(228,126,26,0.8);border-radius:8px 8px 0 0;
       padding:7px 14px;letter-spacing:0.5px;}
     .leaders-table{width:100%;border-collapse:collapse;
       background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);}
@@ -189,7 +195,7 @@
   </div>
   <div class="hero">
     <div class="hero-main" style="font-size:14px;letter-spacing:8px;opacity:0.4;margin-bottom:2px">СЕНТЯБРЬ — НОЯБРЬ 2026</div>
-    <div class="hero-sub" style="font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:8px;color:var(--red);line-height:1;text-shadow:0 0 30px rgba(232,65,42,0.7),0 0 60px rgba(232,65,42,0.3);display:block;margin-top:-4px">УСТАНОВИ СВОЙ РЕКОРД</div>
+    <div class="hero-sub" style="font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:8px;color:var(--red);line-height:1;text-shadow:0 0 30px rgba(228,126,26,0.7),0 0 60px rgba(228,126,26,0.3);display:block;margin-top:-4px">УСТАНОВИ СВОЙ РЕКОРД</div>
   </div>
   <div class="header-right">
     <div class="month-badge" id="monthBadge">Загрузка...</div>
@@ -228,14 +234,14 @@
       <div class="reg-section-title">👥 Категории</div>
       <div class="cat-grid-m">
         <div class="cat-card-m" style="background:rgba(34,197,94,0.07);border-color:rgba(34,197,94,0.2)">
-          <div class="cat-icon-m">🧒</div><div class="cat-name-m" style="color:#22c55e">Дети</div>
+          <div class="cat-icon-m">🧒</div><div class="cat-name-m" style="color:#64B145">Дети</div>
           <div class="cat-age-m">До 10 лет</div><div class="cat-age-m">♂ / ♀</div>
         </div>
-        <div class="cat-card-m" style="background:rgba(0,194,255,0.07);border-color:rgba(0,194,255,0.2)">
+        <div class="cat-card-m" style="background:rgba(142,116,173,0.09);border-color:rgba(142,116,173,0.25)">
           <div class="cat-icon-m">👦</div><div class="cat-name-m" style="color:var(--accent1)">Подростки</div>
           <div class="cat-age-m">11 — 14 лет</div><div class="cat-age-m">♂ / ♀</div>
         </div>
-        <div class="cat-card-m" style="background:rgba(124,58,237,0.07);border-color:rgba(124,58,237,0.2)">
+        <div class="cat-card-m" style="background:rgba(228,126,26,0.09);border-color:rgba(228,126,26,0.25)">
           <div class="cat-icon-m">🧗</div><div class="cat-name-m" style="color:var(--accent2)">Взрослые</div>
           <div class="cat-age-m">15 лет и старше</div><div class="cat-age-m">♂ / ♀</div>
         </div>
@@ -275,14 +281,14 @@
   const REFRESH_INTERVAL = 30000;
 
   const LOCATIONS = {
-    "🏔 Красная Площадь":["Трасса 1","Трасса 2"],
     "🌌 Галактика":      ["Трасса 1","Трасса 2"],
     "🏰 Сказка":         ["Трасса 1","Трасса 2"],
+    "🏔 Красная Площадь":["Трасса 1","Трасса 2"],
   };
   const LOC_COLORS = {
-    "🏔 Красная Площадь":{t1:"#00c2ff",t2:"#7c3aed"},
-    "🌌 Галактика":      {t1:"#f59e0b",t2:"#10b981"},
-    "🏰 Сказка":         {t1:"#f43f5e",t2:"#8b5cf6"},
+    "🌌 Галактика":      {t1:"#8E74AD",t2:"#6B5490"},
+    "🏰 Сказка":         {t1:"#64B145",t2:"#4A8F31"},
+    "🏔 Красная Площадь":{t1:"#E47E1A",t2:"#C25F0A"},
   };
   const MONTHS={"January":"Январь","February":"Февраль","March":"Март","April":"Апрель",
     "May":"Май","June":"Июнь","July":"Июль","August":"Август",
@@ -317,7 +323,7 @@
       grid.className="tracks-grid";
 
       LOCATIONS[loc].forEach((track,ti)=>{
-        const color=(LOC_COLORS[loc]||{})[ti===0?"t1":"t2"]||"#00c2ff";
+        const color=(LOC_COLORS[loc]||{})[ti===0?"t1":"t2"]||"#8E74AD";
         const tp=document.createElement("div");
         tp.className="track-panel";
 
